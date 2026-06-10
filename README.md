@@ -62,8 +62,10 @@ No manual steps required. Check the [Actions tab](../../actions) to follow the p
 ├── public/                 # Static assets
 ├── src/
 │   ├── components/         # Astro components
+│   ├── data/               # Data
 │   ├── layouts/            # Page layouts
-│   └── pages/              # File-based routing
+│   ├── pages/              # File-based routing
+│   └── styles/             # Styles
 ├── astro.config.mjs
 ├── bun.lock
 └── tsconfig.json

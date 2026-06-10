@@ -1,11 +1,89 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SkillBadge from "../components/ui/portfolio/SkillBadge.astro";
+import ExperienceItem from "../components/ui/portfolio/ExperienceItem.astro";
+import SectionHeader from "../components/ui/portfolio/SectionHeader.astro";
+import Button from "../components/ui/generics/Button.astro";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import { skills } from "../data/skills";
+import { experience } from "../data/experience";
+
+const categories = [...new Set(skills.map(s => s.category))];
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<BaseLayout>
+
+  <!-- HERO -->
+  <section aria-label="Presentación" class="py-20">
+
+    <h1 class="text-4xl font-medium text-zinc-100 leading-tight tracking-tight">
+      Javier Bernal
+    </h1>
+    <p class="mt-1 text-lg text-zinc-300 tracking-wide">
+      Desarrollador Full Stack
+    </p>
+
+    <p class="mt-4 text-zinc-300 leading-relaxed">
+      Desarrollador Full Stack con más de 5 años en la
+      <strong class="text-zinc-200 font-medium">administración pública</strong>,
+      especializado en <strong class="text-zinc-200 font-medium">Spring Boot</strong>
+      y <strong class="text-zinc-200 font-medium">Angular</strong>. Trabajo en entornos
+      ágiles con equipos multidisciplinares, integrando CI/CD e IA aplicada como parte
+      habitual del flujo de desarrollo.
+    </p>
+
+    <div class="mt-8 flex items-center gap-3">
+      <Button href="/contact">
+        Contacto
+      </Button>
+
+      <a
+        href="/blog"
+        class="text-sm text-zinc-300 transition-colors hover:text-zinc-100"
+      >
+        Ver contenido técnico →
+      </a>
+    </div>
+
+  </section>
+
+  <hr class="border-zinc-700" aria-hidden="true" />
+
+  <!-- EXPERIENCE -->
+  <section aria-label="Experiencia" class="py-12">
+    <SectionHeader title="Experiencia" />
+
+    <ol class="relative mt-8 space-y-8 border-l border-zinc-800">
+      {experience.map((item) => (
+        <li class="ml-6">
+          <span class={`absolute -left-1.5 h-3 w-3 rounded-full border-2 border-zinc-900 ${item.current ? 'bg-cyan-400' : 'bg-zinc-600'}`} />
+          <ExperienceItem {...item} />
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <hr class="border-zinc-700" aria-hidden="true" />
+
+  <!-- SKILLS -->
+  <section aria-label="Tecnologías" class="py-12">
+    <SectionHeader title="Tecnologías" />
+
+    <div class="mt-6 space-y-6">
+      {categories.map(category => (
+        <div>
+          <p class="mb-3 text-xs text-zinc-300 uppercase tracking-widest">{category}</p>
+          <div class="flex flex-wrap gap-2" role="list" aria-label={`Tecnologías de ${category}`}>
+            {skills.filter(s => s.category === category).map(skill => (
+              <div role="listitem">
+                <SkillBadge name={skill.name} />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+
+  </section>
+
+</BaseLayout>

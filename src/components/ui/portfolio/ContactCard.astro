@@ -1,0 +1,36 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  subtitle: string;
+  external?: boolean;
+}
+
+const {
+  href,
+  title,
+  subtitle,
+  external = false
+} = Astro.props;
+---
+
+<a
+  href={href}
+  target={external ? "_blank" : undefined}
+  rel={external ? "noopener noreferrer" : undefined}
+  class="group flex items-center gap-3.5 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3.5 transition-colors hover:border-zinc-600 hover:bg-zinc-700"
+>
+  <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-700 group-hover:bg-zinc-600 transition">
+    <slot name="icon" />
+  </span>
+
+  <div class="flex-1 min-w-0">
+    <p class="text-sm font-medium text-zinc-200">
+      {title}
+    </p>
+
+    <p class="text-xs text-zinc-400 font-mono truncate">
+      {subtitle}
+    </p>
+  </div>
+</a>

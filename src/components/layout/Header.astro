@@ -1,0 +1,59 @@
+---
+const pathname = Astro.url.pathname;
+---
+
+<header class="sticky top-0 z-50 border-b border-zinc-700 bg-zinc-900/80 backdrop-blur-md">
+  <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
+
+    <a href="/" class="text-lg font-bold text-white">
+      @bernalac
+    </a>
+
+    <nav class="flex items-center gap-6 text-sm">
+
+      <a
+        href="/"
+        class={`transition ${
+          pathname === "/" ? "text-white font-medium" : "text-zinc-300 hover:text-zinc-100"
+        }`}
+      >
+        Portfolio
+      </a>
+
+      <a
+        href="/blog"
+        class={`transition ${
+          pathname === "/blog" ? "text-white font-medium" : "text-zinc-300 hover:text-zinc-100"
+        }`}
+      >
+        Blog
+      </a>
+
+      <a
+        href="/contact"
+        class={`transition ${
+          pathname === "/contact" ? "text-white font-medium" : "text-zinc-300 hover:text-zinc-100"
+        }`}
+      >
+        Contacto
+      </a>
+
+      <a
+        href="/cv.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 rounded-md bg-linear-to-r from-cyan-500 to-cyan-400 px-4 py-2 text-sm font-medium text-zinc-900 shadow-lg shadow-cyan-500/25 transition-all hover:from-cyan-400 hover:to-cyan-300 hover:shadow-cyan-500/40 active:scale-95">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
+          <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
+          <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
+        </svg>
+
+        Descargar CV
+      </a>
+
+    </nav>
+
+  </div>
+</header>
+
+<!--           class="inline-flex items-center gap-2 rounded-md bg-linear-to-r from-cyan-400 to-blue-500 px-4 py-2 text-sm font-medium text-black shadow-md transition hover:opacity-90 active:scale-95"  -->

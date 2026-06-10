@@ -1,0 +1,41 @@
+---
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+import "../styles/global.css";
+
+const {
+  title = "Portfolio - bernalac",
+  description = "Espacio personal de bernalac, desarrollador web y entusiasta de la tecnología.",
+} = Astro.props;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="Javier Bernal" />
+    <meta name="theme-color" content="#09090b" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+
+  <body class="min-h-screen bg-zinc-900 text-zinc-100 flex flex-col antialiased leading-relaxed scroll-smooth selection:bg-cyan-500/30 selection:text-white">
+
+    <Header />
+
+    <main class="flex-1 w-full max-w-4xl mx-auto px-4 py-12">
+      <slot />
+    </main>
+
+    <Footer />
+
+  </body>
+</html>
