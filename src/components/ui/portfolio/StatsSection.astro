@@ -1,13 +1,13 @@
 ---
 const stats = [
   { value: "5+",  label: "años",                        title: "Experiencia" },
-  { value: "4",   label: "proyectos del sector público",  title: "Sector"      },
+  { value: "5",   label: "proyectos del sector público",  title: "Sector"      },
   { value: "20+", label: "tecnologías",                  title: "Stack"       },
 ];
 ---
 
 <section aria-label="Resumen" class="py-10">
-  <dl class="grid grid-cols-3 gap-4">
+  <div class="grid grid-cols-3 gap-4">
     {stats.map(({ value, label, title }) => (
       <div class="group relative rounded-lg border border-zinc-700/50 bg-zinc-800/30 px-4 py-5 overflow-hidden transition-all duration-300 hover:border-cyan-400/20 hover:bg-zinc-800/60">
 
@@ -15,11 +15,19 @@ const stats = [
 
         <div class="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-cyan-400/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        <dt class="text-xs text-zinc-400 uppercase tracking-widest mb-2">{title}</dt>
-        <dd class="text-3xl font-medium text-zinc-100 tracking-tight">{value}</dd>
-        <dd class="text-xs text-zinc-400 mt-1">{label}</dd>
+        <div class="text-xs text-zinc-400 uppercase tracking-widest mb-2">
+          {title}
+        </div>
+
+        <div class="text-3xl font-medium text-zinc-100 tracking-tight">
+          {value}
+        </div>
+
+        <div class="text-xs text-zinc-400 mt-1">
+          {label}
+        </div>
 
       </div>
     ))}
-  </dl>
+  </div>
 </section>
