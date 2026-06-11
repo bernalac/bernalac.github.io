@@ -1,57 +1,85 @@
 ---
+import NavLink from "../components/ui/header/NavLink.astro";
+
 const pathname = Astro.url.pathname;
+
+const navItems = [
+  { href: "/", label: "Portfolio" },
+  { href: "/blog", label: "Blog" },
+  { href: "/contact", label: "Contacto" },
+];
 ---
 
-<header class="sticky top-0 z-50 border-b border-zinc-700 bg-zinc-900/80 backdrop-blur-md">
+<header class="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-900/80 backdrop-blur-md">
   <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
 
-    <a href="/" class="text-lg font-bold text-white">
+    <a
+      href="/"
+      class="text-lg font-semibold tracking-tight text-white"
+    >
       @bernalac
     </a>
 
-    <nav class="flex items-center gap-6 text-sm">
+    <nav
+      aria-label="Principal"
+      class="hidden md:flex items-center gap-6"
+    >
+      {
+        navItems.map((item) => (
+          <NavLink
+            href={item.href}
+            active={pathname === item.href}
+          >
+            {item.label}
+          </NavLink>
+        ))
+      }
+    </nav>
 
-      <a
-        href="/"
-        class={`transition ${
-          pathname === "/" ? "text-white font-medium" : "text-zinc-300 hover:text-zinc-100"
-        }`}
+    <a
+      href="/cv.pdf"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="hidden md:inline-flex items-center gap-2 rounded-lg border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-medium text-cyan-300 transition-all duration-300 hover:border-cyan-400/40 hover:bg-cyan-400/15 hover:text-cyan-200"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        class="size-4"
       >
-        Portfolio
-      </a>
+        <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
+        <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
+      </svg>
 
-      <a
-        href="/blog"
-        class={`transition ${
-          pathname === "/blog" ? "text-white font-medium" : "text-zinc-300 hover:text-zinc-100"
-        }`}
-      >
-        Blog
-      </a>
+      CV
+    </a>
+  </div>
 
-      <a
-        href="/contact"
-        class={`transition ${
-          pathname === "/contact" ? "text-white font-medium" : "text-zinc-300 hover:text-zinc-100"
-        }`}
-      >
-        Contacto
-      </a>
+  <nav
+    aria-label="Principal móvil"
+    class="md:hidden border-t border-zinc-800"
+  >
+    <div class="flex justify-around px-4 py-3">
+      {
+        navItems.map((item) => (
+          <NavLink
+            href={item.href}
+            active={pathname === item.href}
+          >
+            {item.label}
+          </NavLink>
+        ))
+      }
 
       <a
         href="/cv.pdf"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center gap-2 rounded-md bg-linear-to-r from-cyan-500 to-cyan-400 px-4 py-2 text-sm font-medium text-zinc-900 shadow-lg shadow-cyan-500/25 transition-all hover:from-cyan-400 hover:to-cyan-300 hover:shadow-cyan-500/40 active:scale-95">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
-          <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
-          <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
-        </svg>
-
-        Descargar CV
+        class="text-cyan-400 text-sm font-medium hover:text-cyan-300 transition"
+      >
+        CV
       </a>
-
-    </nav>
-
-  </div>
+    </div>
+  </nav>
 </header>
