@@ -3,6 +3,7 @@ export interface ExperienceItem {
   company: string;
   period: string;
   description: string;
+  highlight?: string;
   current?: boolean;
 }
 
@@ -11,25 +12,33 @@ export const experience: ExperienceItem[] = [
     role: "Desarrollador Full Stack Senior",
     company: "Sopra Steria - Generalitat Valenciana",
     period: "2024 - actualidad",
-    description: "Desarrollo full stack con Spring Boot y Angular en entorno CI/CD. Mantenimiento evolutivo e incidencias de aplicaciones Java y ZK Framework (MVVM). Análisis estático, pruebas unitarias, documentación técnica e integraciones con GvLogin, GvClau, PAI, Portafirmas, SGDE y Nexus.",
-    current: true
+    description:
+      "Desarrollo full stack con Spring Boot y Angular en entorno CI/CD. Mantenimiento evolutivo e incidencias de aplicaciones Java y ZK Framework (MVVM). Análisis estático, pruebas unitarias, documentación técnica e integraciones con GvLogin, GvClau, PAI, Portafirmas, SGDE y Nexus.",
+    highlight: "Reducción de incidencias críticas mediante análisis estático sistemático en cada PR.",
+    current: true,
   },
   {
     role: "Desarrollador Full Stack",
     company: "Hasten Group - Junta de Andalucía",
     period: "2022 - 2024",
-    description: "Desarrollo de aplicaciones Java con JSP, JSF y Spring Boot, e interfaces con React. Gestión completa del ciclo de proyecto: estimación, despliegue, diseño de base de datos SQL, informes y soporte."
+    description:
+      "Desarrollo de aplicaciones Java con JSP, JSF y Spring Boot, e interfaces con React. Gestión completa del ciclo de proyecto: estimación, despliegue, diseño de base de datos SQL, informes y soporte.",
+    highlight: "Responsable end-to-end de múltiples aplicaciones en producción simultaneamente.",
   },
   {
     role: "Desarrollador Full Stack",
     company: "Ayesa - Junta de Andalucía",
     period: "2021 - 2022",
-    description: "Mantenimiento evolutivo de aplicaciones públicas con Java, Spring Boot y PHP. Interfaces con HTML, CSS, Bootstrap y Thymeleaf. Integraciones con PTWanda, Trewa y VEA."
+    description:
+      "Mantenimiento evolutivo de aplicaciones públicas con Java, Spring Boot y PHP. Interfaces con HTML, CSS, Bootstrap y Thymeleaf. Integraciones con PTWanda, Trewa y VEA.",
+    highlight: "Integraciones con tres plataformas externas de la administración sin incidencias en producción.",
   },
   {
     role: "SysAdmin / DevOps",
     company: "Skudonet - Producto propio",
     period: "2019 - 2020",
-    description: "Monitoreo de infraestructura con Icinga2, gestión de backups con Bareos y administración de red con Omada. Implantación de Passbolt y Nextcloud. Automatización con Ansible y Bash, virtualización con Xen, VMware, Hyper-V y KVM."
+    description:
+      "Monitoreo de infraestructura con Icinga2, gestión de backups con Bareos y administración de red con Omada. Implantación de Passbolt y Nextcloud. Automatización con Ansible y Bash, virtualización con Xen, VMware, Hyper-V y KVM.",
+    highlight: "Automatización de tareas manuales recurrentes con Ansible, reduciendo tiempo operativo.",
   },
 ];

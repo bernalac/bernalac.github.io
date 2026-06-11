@@ -1,6 +1,21 @@
 ---
-const { name } = Astro.props;
+import type { SkillLevel } from "../../../data/skills";
+
+interface Props {
+  name: string;
+  level: SkillLevel;
+}
+
+const { name, level } = Astro.props;
+
+const dotClass: Record<SkillLevel, string> = {
+  expert: "bg-cyan-400",
+  mid:    "bg-zinc-500",
+  basic:  "bg-zinc-700",
+};
 ---
-<span class="rounded-md border border-zinc-700 bg-zinc-800/80 px-3 py-1 text-xs text-zinc-300 cursor-default transition-all duration-300 hover:border-cyan-400/40 hover:bg-cyan-400/5 hover:text-zinc-100 hover:shadow-[0_0_12px_rgba(34,211,238,0.15)]">
+
+<span class="inline-flex items-center gap-1.5 rounded-md border border-zinc-700 bg-zinc-800/80 px-3 py-1 text-xs text-zinc-300 cursor-default transition-all duration-300 hover:border-cyan-400/40 hover:bg-cyan-400/5 hover:text-zinc-100 hover:shadow-[0_0_12px_rgba(34,211,238,0.15)]">
+  <span class={`h-1.5 w-1.5 rounded-full shrink-0 ${dotClass[level]}`} aria-hidden="true" />
   {name}
 </span>

@@ -1,0 +1,50 @@
+---
+import Button from "../generics/Button.astro";
+---
+
+<section aria-label="Presentación" class="py-20">
+
+  <div class="flex items-center gap-4 mb-6">
+    <div
+      class="h-16 w-16 shrink-0 rounded-full bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400 font-medium text-lg select-none"
+      aria-hidden="true"
+    >
+      JB
+    </div>
+    <div>
+      <h1 class="text-4xl font-medium text-zinc-100 leading-tight tracking-tight">
+        Javier Bernal
+      </h1>
+      <p class="mt-0.5 text-lg text-zinc-400 tracking-wide">
+        Desarrollador Full Stack · Administración pública
+      </p>
+    </div>
+  </div>
+
+  <p class="text-zinc-300 leading-relaxed max-w-xl">
+    Más de 5 años construyendo aplicaciones para la administración pública con
+    <strong class="text-zinc-200 font-medium">Spring Boot</strong> y
+    <strong class="text-zinc-200 font-medium">Angular</strong>.
+    Apasionado por la <strong class="text-zinc-200 font-medium">IA aplicada</strong>
+    al flujo de desarrollo y los entornos ágiles con equipos multidisciplinares.
+  </p>
+
+  <div class="mt-4 flex flex-wrap gap-2">
+    {["Spring Boot", "Angular", "CI/CD", "IA aplicada", "Docker"].map((tag) => (
+      <span class="rounded-full border border-zinc-700 px-3 py-0.5 text-xs text-zinc-400">
+        {tag}
+      </span>
+    ))}
+  </div>
+
+  <div class="mt-8 flex items-center gap-3">
+    <Button href="/contact">Contacto</Button>
+    <a
+      href="/blog"
+      class="text-sm text-zinc-300 transition-colors hover:text-zinc-100"
+    >
+      Ver contenido técnico →
+    </a>
+  </div>
+
+</section>

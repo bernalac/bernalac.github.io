@@ -1,0 +1,50 @@
+---
+import SectionHeader from "./SectionHeader.astro";
+import SkillBadge from "./SkillBadge.astro";
+import { skills } from "../../../data/skills";
+
+const categories = [...new Set(skills.map((s) => s.category))];
+
+const legend = [
+  { label: "Experto",      class: "bg-cyan-400"                         },
+  { label: "Intermedio",   class: "bg-zinc-500"                         },
+  { label: "Conocimiento", class: "bg-zinc-700 border border-zinc-600"  },
+];
+---
+
+<section aria-label="Tecnologías" class="py-12">
+  <SectionHeader title="Tecnologías" />
+
+  <div class="mt-4 mb-6 flex items-center gap-4 text-xs text-zinc-500" aria-label="Leyenda de niveles">
+    {legend.map(({ label, class: cls }) => (
+      <span class="flex items-center gap-1.5">
+        <span class={`h-1.5 w-1.5 rounded-full ${cls}`} aria-hidden="true" />
+        {label}
+      </span>
+    ))}
+  </div>
+
+  <div class="space-y-6">
+    {categories.map((category) => (
+      <div>
+        <p class="mb-3 text-xs text-zinc-300 uppercase tracking-widest">
+          {category}
+        </p>
+        <div
+          class="flex flex-wrap gap-2"
+          role="list"
+          aria-label={`Tecnologías de ${category}`}
+        >
+          {skills
+            .filter((s) => s.category === category)
+            .map((skill) => (
+              <div role="listitem">
+                <SkillBadge name={skill.name} level={skill.level} />
+              </div>
+            ))}
+        </div>
+      </div>
+    ))}
+  </div>
+
+</section>
