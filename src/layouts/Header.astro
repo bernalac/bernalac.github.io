@@ -28,7 +28,7 @@ const navItems = [
         navItems.map((item) => (
           <NavLink
             href={item.href}
-            active={pathname === item.href}
+            active={item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)}
           >
             {item.label}
           </NavLink>
