@@ -8,6 +8,11 @@ const navItems = [
   { href: "/blog/", label: "Blog" },
   { href: "/contact/", label: "Contacto" },
 ];
+
+const isActive = (href: string) =>
+  href === "/"
+    ? pathname === "/"
+    : pathname.startsWith(href);
 ---
 
 <header class="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-900/80 backdrop-blur-md">
@@ -20,6 +25,7 @@ const navItems = [
       @bernalac
     </a>
 
+    <!-- Navegación escritorio -->
     <nav
       aria-label="Principal"
       class="hidden md:flex items-center gap-6"
@@ -28,7 +34,7 @@ const navItems = [
         navItems.map((item) => (
           <NavLink
             href={item.href}
-            active={item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)}
+            active={isActive(item.href)}
           >
             {item.label}
           </NavLink>
@@ -56,6 +62,7 @@ const navItems = [
     </a>
   </div>
 
+  <!-- Navegación móvil -->
   <nav
     aria-label="Principal móvil"
     class="md:hidden border-t border-zinc-800"
@@ -65,7 +72,7 @@ const navItems = [
         navItems.map((item) => (
           <NavLink
             href={item.href}
-            active={pathname === item.href}
+            active={isActive(item.href)}
           >
             {item.label}
           </NavLink>
