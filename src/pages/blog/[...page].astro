@@ -1,9 +1,18 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import type { GetStaticPaths } from "astro";
+import Paginator from "../../components/blog/Paginator.astro";
 
-const posts = await getCollection("blog", ({ data }) => !data.draft);
-const sortedPosts = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const sortedPosts = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+  return paginate(sortedPosts, { pageSize: 5 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const sortedPosts = page.data;
 ---
 
 <BaseLayout
@@ -16,13 +25,9 @@ const sortedPosts = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.val
       Artículos
     </h1>
 
-    {sortedPosts.length > 0 && (
-      <p class="mt-3 text-zinc-400 leading-relaxed">
-        {sortedPosts.length}{" "}
-        {sortedPosts.length === 1 ? "entrada" : "entradas"} sobre{" "}
-        <span class="text-zinc-300">Java, Spring Boot, arquitectura y desarrollo web</span>.
-      </p>
-    )}
+    <p class="mt-2 text-sm text-zinc-400 sm:text-base">
+      Escribo sobre desarrollo web, Java, Spring Boot, arquitectura de software y experiencias aprendidas durante mi carrera.
+    </p>
 
     {sortedPosts.length === 0 ? (
       <div class="mt-12 rounded-xl border border-dashed border-zinc-700 px-5 py-10 text-center">
@@ -83,6 +88,8 @@ const sortedPosts = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.val
         })}
       </ul>
     )}
+
+    <Paginator page={page} />
 
   </section>
 </BaseLayout>
