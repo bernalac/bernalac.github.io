@@ -12,7 +12,7 @@ export async function getStaticPaths() {
 
   return posts.map((post) => ({
     params: {
-      slug: post.data.slug,
+      slug: post.id,
     },
     props: { post },
   }));
@@ -26,7 +26,7 @@ const { post } = Astro.props;
 
 const { Content } = await render(post);
 
-const { title, description, date, tags, cover } = post.data;
+const { title, description, date, tags, cover, robots } = post.data;
 
 const formattedDate = date.toLocaleDateString("es-ES", {
   year: "numeric",
@@ -35,7 +35,7 @@ const formattedDate = date.toLocaleDateString("es-ES", {
 });
 ---
 
-<BaseLayout title={`${title} - bernalac`} description={description}>
+<BaseLayout title={`${title} - bernalac`} description={description} noindex={!robots} image={cover.src}>
   <article class="mx-auto w-full max-w-2xl px-4 py-16">
 
     <!-- COVER -->
@@ -94,7 +94,7 @@ const formattedDate = date.toLocaleDateString("es-ES", {
     </div>
 
     <!-- FOOTER -->
-    <footer class="mt-16 border-t border-[#E7D6C2] pt-8 flex items-center justify-between">
+    <footer class="mt-16 border-t border-zinc-800 pt-8 flex items-center justify-between">
       <a
         href="/blog/"
         class="text-sm text-zinc-300 transition-colors hover:text-zinc-100"

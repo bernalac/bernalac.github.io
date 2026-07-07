@@ -1,21 +1,18 @@
 ---
 import Button from "../generics/Button.astro";
 import ButtonLink from "../generics/ButtonLink.astro";
+import { Image } from "astro:assets";
+import avatar from "../../../assets/avatar.webp";
 ---
 
 <section aria-label="Presentación" class="py-20">
 
   <div class="flex items-center gap-4 mb-6">
     <div class="relative h-24 w-24 shrink-0 group">
-      <img
-        src="/avatar.webp"
-        alt="Foto de Javier Bernal, desarrollador full stack"
-        class="h-full w-full rounded-full object-cover border border-zinc-700
+      <Image src={avatar} alt="Foto de Javier Bernal, desarrollador full stack" width={96} height={96} class="h-full w-full rounded-full object-cover border border-zinc-700
               transition-all duration-300 ease-out
               group-hover:scale-110 group-hover:brightness-110 transform-gpu
-              group-hover:shadow-md group-hover:shadow-cyan-500/30"
-        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
-      />
+              group-hover:shadow-md group-hover:shadow-cyan-500/30" />
       <div
         style="display:none"
         class="absolute inset-0 rounded-full bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400 font-medium text-lg select-none"

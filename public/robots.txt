@@ -2,11 +2,4 @@
 User-agent: *
 Allow: /
 
-# Bloquea directorios que no interesan
-Disallow: /admin/
-Disallow: /borradores/
-Disallow: /paginas-privadas/
-
-# Indica la ubicación de tu Sitemap (¡Muy importante!)
-# Asegúrate de reemplazar esto con tu dominio real
-Sitemap: https://bernalac.github.io
+Sitemap: https://bernalac.github.io/sitemap-index.xml

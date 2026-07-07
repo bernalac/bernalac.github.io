@@ -1,7 +1,6 @@
 ---
 title: "Cómo gestionar excepciones globales en Spring Boot con @RestControllerAdvice"
 description: "En este artículo explico cómo centralizar las excepciones en Spring Boot con @ControllerAdvice y así evitar devolver errores inconsistentes mediante API."
-slug: "manejo-global-excepciones-spring"
 category: "java"
 tags: ["java", "spring-boot", "excepciones", "api rest", "buenas practicas"]
 author: "Javier Bernal"

@@ -11,6 +11,7 @@ const { href, target } = Astro.props;
   href={href}
   target={target}
   class="rounded-lg bg-zinc-800 border border-zinc-700 px-4 py-2 text-sm text-zinc-200 transition-colors hover:bg-zinc-700 hover:border-zinc-600"
+  rel={target === "_blank" ? "noopener noreferrer" : undefined}
 >
   <slot />
 </a>

@@ -11,6 +11,7 @@ const { href, target } = Astro.props;
   href={href}
   target={target}
   class="text-sm text-zinc-300 transition-colors hover:text-zinc-100"
+  rel={target === "_blank" ? "noopener noreferrer" : undefined}
 >
   <slot />
 </a>

@@ -8,7 +8,7 @@ export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
   const sortedPosts = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-  return paginate(sortedPosts, { pageSize: 5 });
+  return paginate(sortedPosts, { pageSize: 3 });
 }) satisfies GetStaticPaths;
 
 const { page } = Astro.props;
@@ -25,7 +25,7 @@ const sortedPosts = page.data;
       Artículos
     </h1>
 
-    <p class="mt-2 text-sm text-zinc-400 sm:text-base">
+    <p class="mt-2 text-sm text-zinc-300 sm:text-base">
       Escribo sobre desarrollo web, Java, Spring Boot, arquitectura de software y experiencias aprendidas durante mi carrera.
     </p>
 
@@ -47,7 +47,7 @@ const sortedPosts = page.data;
           return (
             <li role="listitem">
               <a
-                href={`/blog/${post.data.slug}/`}
+                href={`/blog/${post.id}/`}
                 class="group relative block overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/30 px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-700/50 hover:bg-zinc-800/60 hover:shadow-lg hover:shadow-cyan-950/20 sm:px-5 sm:py-5"
               >
                 <!-- Accent bar on hover -->

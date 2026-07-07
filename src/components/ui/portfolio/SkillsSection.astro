@@ -3,24 +3,11 @@ import SectionHeader from "./SectionHeader.astro";
 import SkillBadge from "./SkillBadge.astro";
 import { skills } from "../../../data/skills";
 
-const categories = [...new Set(skills.map((s) => s.category))];
-
-const legend = [
-  { label: "Experto",      class: "bg-cyan-400"                         },
-  { label: "Intermedio",   class: "bg-zinc-500"                         }];
+const categories = [...new Set(skills.map((s) => s.category))]; 
 ---
 
 <section aria-label="Tecnologías" class="py-12">
   <SectionHeader title="Tecnologías" />
-
-  <div class="mt-4 mb-6 flex items-center gap-4 text-xs text-zinc-300" aria-label="Leyenda de niveles">
-    {legend.map(({ label, class: cls }) => (
-      <span class="flex items-center gap-1.5">
-        <span class={`h-1.5 w-1.5 rounded-full ${cls}`} aria-hidden="true" />
-        {label}
-      </span>
-    ))}
-  </div>
 
   <div class="space-y-6">
     {categories.map((category) => (
