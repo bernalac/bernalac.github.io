@@ -5,10 +5,18 @@ import type { GetStaticPaths } from "astro";
 import Paginator from "../../components/blog/Paginator.astro";
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const posts = await getCollection("blog", ({ data }) => !data.draft);
-  const sortedPosts = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  const posts = await getCollection(
+    "blog",
+    ({ data }) => !data.draft
+  );
 
-  return paginate(sortedPosts, { pageSize: 3 });
+  const sortedPosts = posts.sort(
+    (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+  );
+
+  return paginate(sortedPosts, {
+    pageSize: 3,
+  });
 }) satisfies GetStaticPaths;
 
 const { page } = Astro.props;
@@ -16,80 +24,114 @@ const sortedPosts = page.data;
 ---
 
 <BaseLayout
-  title="Blog - bernalac"
-  description="Artículos sobre desarrollo web, Java, Spring Boot, arquitectura de software y experiencias aprendidas durante mi carrera como desarrollador full stack."
+  title="Artículos - bernalac"
+  description="Explora mis artículos sobre desarrollo web, Java, Spring Boot y arquitectura de software. Comparte experiencias, aprendizajes y decisiones técnicas."
 >
-  <section class="mx-auto w-full max-w-2xl px-4 py-12 sm:py-16">
+  <section>
+    <header>
+      <p
+        class="text-sm font-medium uppercase tracking-[0.18em] text-accent"
+      >
+        Artículos
+      </p>
 
-    <h1 class="text-3xl font-medium leading-tight text-zinc-100 sm:text-4xl">
-      Artículos
-    </h1>
+      <h1
+        class="mt-5 text-4xl font-semibold tracking-[-0.035em] text-primary sm:text-5xl"
+      >
+        Notas de desarrollo
+      </h1>
 
-    <p class="mt-2 text-sm text-zinc-300 sm:text-base">
-      Escribo sobre desarrollo web, Java, Spring Boot, arquitectura de software y experiencias aprendidas durante mi carrera.
-    </p>
+      <p
+        class="mt-5 max-w-xl text-base leading-7 text-content-muted sm:text-lg"
+      >
+        Problemas, soluciones y aprendizajes sobre desarrollo web, Java, Spring Boot y arquitectura de software.
+      </p>
+    </header>
 
-    {sortedPosts.length === 0 ? (
-      <div class="mt-12 rounded-xl border border-dashed border-zinc-700 px-5 py-10 text-center">
-        <p class="text-zinc-400">
-          Todavía no hay artículos publicados.
-        </p>
-      </div>
-    ) : (
-      <ul class="mt-10 space-y-3 sm:mt-12 sm:space-y-4" role="list">
-        {sortedPosts.map((post) => {
-          const formattedDate = post.data.date.toLocaleDateString("es-ES", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          });
+    {
+      sortedPosts.length === 0 ? (
+        <div class="mt-12 border-y border-border py-10">
+          <p class="text-base text-content-muted">
+            Todavía no hay artículos publicados.
+          </p>
+        </div>
+      ) : (
+        <ul
+          class="mt-12 flex flex-col gap-8"
+          role="list"
+        >
+          {sortedPosts.map((post) => {
+            const formattedDate = post.data.date.toLocaleDateString(
+              "es-ES",
+              {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              }
+            );
 
-          return (
-            <li role="listitem">
-              <a
-                href={`/blog/${post.id}/`}
-                class="group relative block overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/30 px-4 py-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-700/50 hover:bg-zinc-800/60 hover:shadow-lg hover:shadow-cyan-950/20 sm:px-5 sm:py-5"
-              >
-                <!-- Accent bar on hover -->
-                <span class="absolute inset-y-0 left-0 w-0.5 scale-y-0 bg-cyan-400 transition-transform duration-300 group-hover:scale-y-100"></span>
+            return (
+              <li role="listitem">
+                <a
+                  href={`/blog/${post.id}/`}
+                  class="group relative block rounded-lg border border-border/80 bg-surface-elevated/50 px-5 py-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 sm:px-6 sm:py-6"
+                >
+                  <!-- Título + fecha -->
+                  <div class="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-5">
+                    <h2
+                      class="text-xl font-semibold tracking-[-0.02em] text-content transition-colors duration-200 group-hover:text-accent"
+                    >
+                      {post.data.title}
+                    </h2>
 
-                <!-- Top row (title + date) -->
-                <div class="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
-                  <h2 class="text-base font-semibold text-zinc-100 transition-colors group-hover:text-cyan-300 sm:text-lg">
-                    {post.data.title}
-                  </h2>
-
-                  <div class="flex shrink-0 items-center gap-2 text-xs text-zinc-500 sm:pt-1">
-                    <time datetime={post.data.date.toISOString()}>{formattedDate}</time>
-                    <span class="hidden translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 sm:inline">
-                      →
-                    </span>
+                    <time
+                      datetime={post.data.date.toISOString()}
+                      class="shrink-0 text-sm text-content-muted"
+                    >
+                      {formattedDate}
+                    </time>
                   </div>
-                </div>
 
-                <!-- Description -->
-                <p class="mt-2 text-sm leading-relaxed text-zinc-400 line-clamp-2 sm:mt-3">
-                  {post.data.description}
-                </p>
+                  <!-- Descripción -->
+                  <p
+                    class="mt-3 text-base leading-7 text-content-muted line-clamp-2"
+                  >
+                    {post.data.description}
+                  </p>
 
-                <!-- Tags -->
-                {post.data.tags?.length > 0 && (
-                  <div class="mt-3 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2">
-                    {post.data.tags.map((tag) => (
-                      <span class="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-400 uppercase tracking-wide group-hover:bg-zinc-700/80 sm:px-2.5 sm:py-1 sm:text-xs">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-    )}
+                  <!-- Tags -->
+                  {
+                    post.data.tags?.length > 0 && (
+                      <div class="mt-4 flex flex-wrap gap-x-3 gap-y-1">
+                        {post.data.tags.map((tag) => (
+                          <span
+                            class="text-xs font-medium text-content-muted transition-colors duration-200 group-hover:text-accent"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )
+                  }
 
-    <Paginator page={page} />
+                  <!-- Indicador -->
+                  <span
+                    aria-hidden="true"
+                    class="absolute bottom-5 right-5 text-lg text-accent opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100"
+                  >
+                    →
+                  </span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      )
+    }
 
+    <!-- Paginación -->
+    <div class="mt-12">
+      <Paginator page={page} />
+    </div>
   </section>
 </BaseLayout>

@@ -1,6 +1,122 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/*
+ * ============================================================
+ * PALETA DE COLOR
+ * ============================================================
+ *
+ * Paleta base:
+ * - Borgoña profundo: identidad principal
+ * - Terracota: acentos e interacción
+ * - Crema: superficies y fondo
+ * - Tinta: contenido y texto
+ */
+
+@theme {
+  /* Borgoña */
+  --color-burgundy-950: #241016;
+  --color-burgundy-900: #32131b;
+  --color-burgundy-800: #431923;
+  --color-burgundy-700: #5a202b;
+  --color-burgundy-600: #722b35;
+
+  /* Terracota */
+  --color-terracotta-700: #8f4537;
+  --color-terracotta-600: #a65340;
+  --color-terracotta-500: #b9624d;
+  --color-terracotta-400: #c97862;
+  --color-terracotta-300: #d99480;
+
+  /* Crema */
+  --color-cream-50: #fcfaf6;
+  --color-cream-100: #f7f2e9;
+  --color-cream-200: #eee5d8;
+  --color-cream-300: #dfd3c4;
+
+  /* Tinta */
+  --color-ink-900: #27201d;
+  --color-ink-700: #514743;
+  --color-ink-500: #766b65;
+
+  /*
+   * ==========================================================
+   * COLORES SEMÁNTICOS
+   * ==========================================================
+   *
+   * Estos son los colores que deberías utilizar normalmente
+   * en los componentes y páginas.
+   */
+
+  --color-surface: var(--color-cream-100);
+  --color-surface-elevated: var(--color-cream-50);
+
+  --color-content: var(--color-ink-900);
+  --color-content-muted: var(--color-ink-500);
+
+  --color-primary: var(--color-burgundy-950);
+  --color-primary-hover: var(--color-burgundy-800);
+
+  --color-accent: var(--color-terracotta-600);
+  --color-accent-hover: var(--color-terracotta-500);
+
+  --color-border: var(--color-cream-300);
+}
+
+
+/*
+ * ============================================================
+ * BASE
+ * ============================================================
+ */
+
 html {
-  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-surface);
+  color: var(--color-content);
+}
+
+
+/*
+ * ============================================================
+ * SELECCIÓN DE TEXTO
+ * ============================================================
+ */
+
+::selection {
+  background-color: color-mix(
+    in srgb,
+    var(--color-accent) 30%,
+    transparent
+  );
+
+  color: var(--color-primary);
+}
+
+
+/*
+ * ============================================================
+ * SCROLLBAR
+ * ============================================================
+ */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-cream-300);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-terracotta-400);
 }

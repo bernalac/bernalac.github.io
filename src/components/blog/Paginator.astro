@@ -13,30 +13,72 @@ interface Props {
 const { page } = Astro.props;
 ---
 
-{page.lastPage > 1 && (
-  <nav class="mt-10 flex items-center justify-between text-sm" aria-label="Paginación">
-    {page.url.prev ? (
-      <a href={page.url.prev} class="text-cyan-400 transition-colors hover:underline">
-        ← Página anterior
-      </a>
-    ) : (
-      <span class="cursor-not-allowed text-zinc-600" aria-disabled="true">
-        ← Página anterior
-      </span>
-    )}
+{
+  page.lastPage > 1 && (
+    <nav
+      class="mt-14 flex items-center justify-between border-t border-border pt-6"
+      aria-label="Paginación"
+    >
+      <!-- Anterior -->
+      {page.url.prev ? (
+        <a
+          href={page.url.prev}
+          rel="prev"
+          class="group inline-flex items-center gap-2 text-base font-medium text-content-muted transition-colors duration-200 hover:text-accent"
+        >
+          <span
+            aria-hidden="true"
+            class="transition-transform duration-200 group-hover:-translate-x-1"
+          >
+            ←
+          </span>
 
-    <span class="text-zinc-400">
-      Página {page.currentPage} de {page.lastPage}
-    </span>
+          <span>Anterior</span>
+        </a>
+      ) : (
+        <span
+          class="inline-flex items-center gap-2 text-base text-content-muted/40"
+          aria-disabled="true"
+        >
+          <span aria-hidden="true">←</span>
+          <span>Anterior</span>
+        </span>
+      )}
 
-    {page.url.next ? (
-      <a href={page.url.next} class="text-cyan-400 transition-colors hover:underline">
-        Página siguiente →
-      </a>
-    ) : (
-      <span class="cursor-not-allowed text-zinc-600" aria-disabled="true">
-        Página siguiente →
+      <!-- Estado -->
+      <span class="text-base text-content-muted">
+        <span class="font-medium text-content">
+          {page.currentPage}
+        </span>
+        <span class="mx-1.5 text-content-muted/60">/</span>
+        {page.lastPage}
       </span>
-    )}
-  </nav>
-)}
+
+      <!-- Siguiente -->
+      {page.url.next ? (
+        <a
+          href={page.url.next}
+          rel="next"
+          class="group inline-flex items-center gap-2 text-base font-medium text-content-muted transition-colors duration-200 hover:text-accent"
+        >
+          <span>Siguiente</span>
+
+          <span
+            aria-hidden="true"
+            class="transition-transform duration-200 group-hover:translate-x-1"
+          >
+            →
+          </span>
+        </a>
+      ) : (
+        <span
+          class="inline-flex items-center gap-2 text-base text-content-muted/40"
+          aria-disabled="true"
+        >
+          <span>Siguiente</span>
+          <span aria-hidden="true">→</span>
+        </span>
+      )}
+    </nav>
+  )
+}

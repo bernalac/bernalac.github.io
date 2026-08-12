@@ -1,30 +1,51 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import HeroSection from "../components/ui/portfolio/HeroSection.astro";
-import StatsSection from "../components/ui/portfolio/StatsSection.astro";
-import ProjectsSection from "../components/ui/portfolio/ProjectsSection.astro";
-import ExperienceSection from "../components/ui/portfolio/ExperienceSection.astro";
-import SkillsSection from "../components/ui/portfolio/SkillsSection.astro";
 ---
 
-<BaseLayout title="Portfolio - bernalac" description="Soy un desarrollador web full stack con experiencia en la creación de aplicaciones modernas y escalables. Explora mis proyectos, experiencia laboral, mi blog y habilidades técnicas para conocer más sobre mi trayectoria profesional.">
+<BaseLayout
+  title="Javier Bernal — Desarrollador de software"
+  description="Sitio personal de Javier Bernal, desarrollador de software. Escribo sobre desarrollo web, Java, Spring Boot, arquitectura y problemas técnicos."
+>
+  <section>
+    <p class="text-sm font-medium uppercase tracking-[0.18em] text-accent">
+      Inicio
+    </p>
 
-  <HeroSection />
+    <h1
+      class="mt-5 max-w-2xl text-4xl font-semibold leading-tight tracking-[-0.035em] text-primary sm:text-5xl"
+    >
+      Sobre este sitio
+    </h1>
 
-  <hr class="border-zinc-700" aria-hidden="true" />
+    <p class="mt-6 max-w-2xl text-lg leading-8 text-content-muted">
+      Este es un espacio dedicado al desarrollo de software, donde comparto
+      artículos sobre problemas, decisiones y aprendizajes que encuentro durante
+      el desarrollo de aplicaciones.
+    </p>
 
-  <StatsSection />
+    <p class="mt-6 max-w-2xl text-lg leading-8 text-content-muted">
+      No pretendo tener todas las respuestas. La idea es documentar aquello que
+      voy aprendiendo y dejarlo aquí para que pueda resultar útil cuando vuelva
+      a encontrarme con algo parecido.
+    </p>
 
-  <hr class="border-zinc-700" aria-hidden="true" />
+    <nav
+      class="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3"
+      aria-label="Enlaces principales"
+    >
+      <a
+        href="/blog/"
+        class="group mt-10 inline-flex items-center gap-2 text-base font-medium text-primary transition-colors duration-200 hover:text-accent"
+      >
+        Explorar artículos
 
-  <ProjectsSection />
-
-  <hr class="border-zinc-700" aria-hidden="true" />
-
-  <ExperienceSection />
-
-  <hr class="border-zinc-700" aria-hidden="true" />
-
-  <SkillsSection />
-
+        <span
+          aria-hidden="true"
+          class="text-accent transition-transform duration-200 group-hover:translate-x-1"
+        >
+          →
+        </span>
+      </a>
+    </nav>
+  </section>
 </BaseLayout>
