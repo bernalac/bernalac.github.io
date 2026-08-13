@@ -80,21 +80,6 @@ No manual steps required. Check the [Actions tab](../../actions) to follow the p
 .
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml      # CI/CD pipeline
-├── public/                 # Static assets
-├── src/
-│   ├── components/         # Astro components
-│   ├── data/               # Data
-│   ├── layouts/            # Page layouts
-│   ├── pages/              # File-based routing
-│   └── styles/             # Styles
-├── astro.config.mjs
-├── bun.lock
-└── tsconfig.json
-
-.
-├── .github/
-│   └── workflows/
 │       └── deploy.yml
 ├── public/
 │   └── ...
