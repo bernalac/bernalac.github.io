@@ -8,7 +8,6 @@ cover: "./images/problema-n1-jpa-hibernate.webp"
 date: 2026-06-16
 updatedAt: 2026-06-24
 draft: false
-featured: true
 robots: true
 ---
 
