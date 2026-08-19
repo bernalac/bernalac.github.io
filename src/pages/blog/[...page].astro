@@ -71,7 +71,7 @@ const sortedPosts = page.data;
             );
 
             return (
-              <li role="listitem" class="h-[220px]">
+              <li role="listitem" class="h-[230px]">
                 <a
                   href={`/blog/${post.id}/`}
                   class="group relative flex h-full flex-col rounded-lg border border-border/80 bg-surface-elevated/50 px-5 py-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 sm:px-6 sm:py-6"
@@ -94,7 +94,7 @@ const sortedPosts = page.data;
 
                   <!-- Descripción -->
                   <p
-                    class="mt-3 line-clamp-3 text-base leading-7 text-content-muted"
+                    class="mt-2 line-clamp-2 overflow-hidden text-base leading-6 text-content-muted sm:mt-3 sm:line-clamp-3 sm:leading-7"
                   >
                     {post.data.description}
                   </p>
