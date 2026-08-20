@@ -19,7 +19,23 @@ El resultado es una API difícil de mantener y, sobre todo, inconsistente para q
 
 En este artículo veremos cómo centralizar el manejo de errores utilizando `@RestControllerAdvice`, creando respuestas homogéneas para toda la aplicación y evitando repetir código en cada controlador.
 
----
+### Índice
+
+1. [El problema](#el-problema)
+2. [¿Qué ocurre cuando no capturamos una excepción?](#qué-ocurre-cuando-no-capturamos-una-excepción)
+3. [La solución: centralizar el manejo de excepciones](#la-solución-centralizar-el-manejo-de-excepciones)
+4. [@ControllerAdvice o @RestControllerAdvice](#controlleradvice-o-restcontrolleradvice)
+5. [Diseñando una respuesta de error](#diseñando-una-respuesta-de-error)
+6. [Implementando el GlobalExceptionHandler](#implementando-el-globalexceptionhandler)
+   1. [Recurso no encontrado (404)](#recurso-no-encontrado-404)
+   2. [Errores de validación (422)](#errores-de-validación-422)
+   3. [Argumentos inválidos (400)](#argumentos-inválidos-400)
+   4. [Acceso denegado (403)](#acceso-denegado-403)
+   5. [Errores inesperados (500)](#errores-inesperados-500)
+7. [ProblemDetail](#problemdetail)
+8. [Buenas prácticas](#buenas-prácticas)
+9. [Conclusión](#conclusión)
+10. [Bibliografía](#bibliografía)
 
 ## El problema
 

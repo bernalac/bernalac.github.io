@@ -1,6 +1,6 @@
 ---
 title: "Idempotencia en APIs REST: cómo evitar operaciones duplicadas con Spring Boot"
-description: "Qué es la idempotencia, por qué es importante en APIs REST y cómo implementar Idempotency-Key correctamente en Spring Boot."
+description: "Qué es la idempotencia, por qué es importante en APIs REST y cómo implementarla correctamente en Spring Boot."
 category: "java"
 tags: ["java", "spring-boot", "api-rest", "idempotencia", "idempotency-key", "buenas-practicas"]
 author: "Javier Bernal"
@@ -11,7 +11,7 @@ draft: true
 robots: true
 ---
 
-Cuando desarrollamos una API REST solemos asumir un flujo idílico: el cliente envía una petición, el servidor la procesa y devuelve una respuesta. Fin de la historia.
+Cuando desarrollamos una API REST solemos asumir un flujo: el cliente envía una petición, el servidor la procesa y devuelve una respuesta. Fin de la historia.
 
 En un sistema real, sin embargo, las cosas no siempre funcionan así.
 
@@ -19,7 +19,7 @@ Una petición puede procesarse **correctamente** en el servidor y, justo despué
 
 Y ahí aparece un problema serio cuando la operación tiene efectos secundarios: crear un pedido dos veces, cobrar un pago dos veces, enviar una transferencia dos veces.
 
-En este artículo veremos qué significa que una operación sea **idempotente**, por qué es especialmente importante en APIs REST, y cómo implementar un mecanismo de idempotencia con `Idempotency-Key` en Spring Boot que aguante concurrencia real y no solo el caso feliz.
+En este artículo veremos qué significa que una operación sea **idempotente**, por qué es especialmente importante en APIs REST, y cómo implementar un mecanismo de `clave de idempotencia` en Spring Boot que aguante concurrencia real.
 
 ### Índice
 
@@ -107,7 +107,7 @@ Este problema no se limita a caídas de red. También aparece por:
 * proxies y balanceadores que cortan conexiones
 * reintentos automáticos de librerías HTTP
 * clientes móviles con conectividad inestable
-* consumidores de colas que reprocesan mensajes
+* consumidores de colas asíncronas que reprocesan mensajes
 
 Por eso una API robusta debe asumir que **una misma operación puede llegar al servidor más de una vez**.
 
@@ -140,8 +140,11 @@ POST → Pedido #1001
 POST → Pedido #1002
 POST → Pedido #1003
 ```
+Esto no quiere decir que `POST` sea *siempre* no idempotente ni que `PUT` sea siempre idempotente. Todo depende de cómo esté implementada la operación.
 
-Esto no significa que `POST` sea *siempre* no idempotente, ni que `PUT` sea automáticamente inmune a la duplicación (piensa en un `PUT` que incrementa un contador). La idempotencia es una propiedad del **comportamiento** de la operación, no del verbo HTTP en sí. La pregunta relevante siempre es:
+La idempotencia depende del comportamiento de la operación, no solo del verbo HTTP.
+
+La pregunta relevante siempre es:
 
 > **¿Qué ocurre si esta misma operación se procesa más de una vez?**
 
@@ -524,3 +527,4 @@ La idempotencia no es solo una cabecera HTTP. Es una decisión de diseño que ha
 * [RFC 9110 — HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110)
 * [Spring Framework Documentation](https://docs.spring.io/spring-framework/reference/)
 * [Spring Data JPA Documentation](https://docs.spring.io/spring-data/jpa/reference/)
+* [Baeldung](https://www.baeldung.com/cs/idempotent-operations)

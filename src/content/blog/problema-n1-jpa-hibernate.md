@@ -11,6 +11,21 @@ draft: false
 robots: true
 ---
 
+### Índice
+
+1. [¿Qué es el problema N+1?](#qué-es-el-problema-n1)
+2. [Ejemplo típico](#ejemplo-típico)
+3. [¿Por qué ocurre?](#por-qué-ocurre)
+4. [Cómo detectarlo](#cómo-detectarlo)
+5. [Soluciones](#soluciones)
+   1. [JPQL con JOIN FETCH](#1-jpql-con-join-fetch)
+   2. [@EntityGraph](#2-entitygraph)
+   3. [@BatchSize](#3-batchsize)
+   4. [Projections o DTOs con JPQL](#4-projections-o-dtos-con-jpql)
+6. [¿Cuál usar?](#cuál-usar)
+7. [Conclusión](#conclusión)
+8. [Bibliografía](#bibliografía)
+
 ## ¿Qué es el problema N+1?
 
 El problema N+1 ocurre cuando, al recuperar una lista de entidades, el ORM (como JPA/Hibernate) ejecuta una consulta adicional por cada elemento para cargar sus relaciones.
