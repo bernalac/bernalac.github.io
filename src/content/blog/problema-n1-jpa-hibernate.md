@@ -3,7 +3,7 @@ title: "El problema N+1 en JPA/Hibernate y cómo resolverlo"
 description: "El problema N+1 es un error común en JPA/Hibernate. En este artículo explico qué es, cómo detectarlo y cómo solucionarlo eficazmente."
 category: "java"
 tags: ["java", "jpa", "hibernate", "spring-boot", "rendimiento"]
-author: "Javier Bernal"
+author: "bernalac"
 cover: "./images/problema-n1-jpa-hibernate.webp"
 date: 2026-06-16
 updatedAt: 2026-06-24

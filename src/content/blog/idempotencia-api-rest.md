@@ -3,41 +3,42 @@ title: "Idempotencia en APIs REST: cómo evitar operaciones duplicadas con Sprin
 description: "Qué es la idempotencia, por qué es importante en APIs REST y cómo implementarla correctamente en Spring Boot."
 category: "java"
 tags: ["java", "spring-boot", "api-rest", "idempotencia", "idempotency-key", "buenas-practicas"]
-author: "Javier Bernal"
+author: "bernalac"
 cover: "./images/idempotencia-api-rest.webp"
 date: 2026-08-13
 updatedAt: 2026-08-13
-draft: true
+draft: false
 robots: true
 ---
-
-Cuando desarrollamos una API REST solemos asumir un flujo: el cliente envía una petición, el servidor la procesa y devuelve una respuesta. Fin de la historia.
+Cuando desarrollamos una API REST solemos asumir un flujo sencillo: el cliente envía una petición, el servidor la procesa y devuelve una respuesta. Fin de la historia.
 
 En un sistema real, sin embargo, las cosas no siempre funcionan así.
 
-Una petición puede procesarse **correctamente** en el servidor y, justo después, perderse la respuesta por un problema de red. Desde el punto de vista del cliente, la operación ha fallado. ¿Qué hará entonces? Probablemente reintentarlo.
+Una petición puede procesarse correctamente en el servidor y, justo después, perderse la respuesta por un problema de red. Desde el punto de vista del cliente, la operación ha fallado. ¿Qué hará entonces? Probablemente **reintentarlo**.
 
-Y ahí aparece un problema serio cuando la operación tiene efectos secundarios: crear un pedido dos veces, cobrar un pago dos veces, enviar una transferencia dos veces.
+Y ahí aparece un problema serio cuando la operación tiene efectos secundarios: crear un pedido dos veces, cobrar un pago dos veces o crear una reserva duplicada.
 
-En este artículo veremos qué significa que una operación sea **idempotente**, por qué es especialmente importante en APIs REST, y cómo implementar un mecanismo de `clave de idempotencia` en Spring Boot que aguante concurrencia real.
+En este artículo veremos qué significa que una operación sea **idempotente**, por qué es especialmente importante en APIs REST y cómo implementar un mecanismo de `Idempotency-Key` en Spring Boot que tenga en cuenta la concurrencia.
 
-Hay que tener en cuenta, además, que una transacción de base de datos no convierte automáticamente una operación distribuida en una operación ejecutada una única vez. Cuando intervienen servicios externos, colas o proveedores de pago, necesitamos mecanismos adicionales.
+También veremos una **limitación importante**: una transacción de base de datos no convierte automáticamente una operación distribuida en una operación ejecutada una única vez. Cuando intervienen servicios externos, colas o proveedores de pago, necesitamos mecanismos adicionales.
 
 ### Índice
-
 1. [El problema de los reintentos](#el-problema-de-los-reintentos)
 2. [¿Qué significa que una operación sea idempotente?](#qué-significa-que-una-operación-sea-idempotente)
 3. [¿Por qué POST suele ser el problema?](#por-qué-post-suele-ser-el-problema)
 4. [Idempotency-Key](#idempotency-key)
-5. [Una primera implementación (y por qué no basta)](#una-primera-implementación-y-por-qué-no-basta)
+5. [Una primera implementación y por qué no basta](#una-primera-implementación-y-por-qué-no-basta)
 6. [El problema de la concurrencia](#el-problema-de-la-concurrencia)
 7. [Diseñando la tabla de idempotencia](#diseñando-la-tabla-de-idempotencia)
-8. [Implementación robusta con Spring Boot](#implementación-robusta-con-spring-boot)
+8. [Implementación con Spring Boot](#implementación-con-spring-boot)
 9. [Estados de una operación idempotente](#estados-de-una-operación-idempotente)
 10. [¿Cuánto tiempo conservar una Idempotency-Key?](#cuánto-tiempo-conservar-una-idempotency-key)
-11. [¿Todas las peticiones necesitan idempotencia?](#todas-las-peticiones-necesitan-idempotencia)
-12. [Buenas prácticas](#buenas-prácticas)
-13. [Conclusión](#conclusión)
+11. [¿Qué ocurre con servicios externos?](#qué-ocurre-con-servicios-externos)
+12. [¿Todas las peticiones necesitan idempotencia?](#todas-las-peticiones-necesitan-idempotencia)
+13. [Respuestas HTTP](#respuestas-http)
+14. [Buenas prácticas](#buenas-prácticas)
+15. [Conclusión](#conclusión)
+
 
 ---
 
@@ -82,19 +83,9 @@ Servidor ────────X────────> Cliente
               respuesta perdida
 ```
 
-El servidor **sí** ha creado el pedido. El cliente, sin embargo, no ha recibido confirmación. Desde su perspectiva, la operación ha fallado, así que reintenta:
+El servidor **sí** ha creado el pedido. El cliente, sin embargo, no ha recibido confirmación. Desde su perspectiva, la operación ha fallado, así que reintenta la petición.
 
-```http
-POST /orders
-Content-Type: application/json
-
-{
-    "productId": 123,
-    "quantity": 2
-}
-```
-
-El servidor vuelve a procesar la operación y ahora tenemos:
+Si el servidor no tiene ningún mecanismo para reconocer ese reintento, volverá a ejecutar la operación:
 
 ```text
 Pedido #1001
@@ -105,11 +96,11 @@ El cliente solo quería un pedido. Se ha creado dos veces.
 
 Este problema no se limita a caídas de red. También aparece por:
 
-* timeouts
-* proxies y balanceadores que cortan conexiones
-* reintentos automáticos de librerías HTTP
-* clientes móviles con conectividad inestable
-* consumidores de colas asíncronas que reprocesan mensajes
+* Timeouts
+* Proxies y balanceadores que cortan conexiones
+* Reintentos automáticos de librerías HTTP
+* Clientes móviles con conectividad inestable
+* Consumidores de colas que reprocesan mensajes
 
 Por eso una API robusta debe asumir que **una misma operación puede llegar al servidor más de una vez**.
 
@@ -119,15 +110,18 @@ Por eso una API robusta debe asumir que **una misma operación puede llegar al s
 
 Una operación es idempotente cuando ejecutarla una vez o varias veces produce **el mismo estado final**.
 
+Por ejemplo:
+
 ```http
 PUT /users/123
+Content-Type: application/json
 
 {
-    "name": "Javier"
+    "name": "bernalac"
 }
 ```
 
-Da igual si esta petición se ejecuta una vez o cinco: el resultado siempre es `Usuario 123 → Javier`.
+Si esta petición se procesa varias veces, el resultado final sigue siendo: `Usuario 123 → bernalac`.
 
 En cambio:
 
@@ -135,16 +129,17 @@ En cambio:
 POST /orders
 ```
 
-ejecutada varias veces puede crear varios recursos distintos:
+puede crear un recurso nuevo cada vez:
 
 ```text
 POST → Pedido #1001
 POST → Pedido #1002
 POST → Pedido #1003
 ```
-Esto no quiere decir que `POST` sea *siempre* no idempotente ni que `PUT` sea siempre idempotente. Todo depende de cómo esté implementada la operación.
 
-La idempotencia depende del comportamiento de la operación, no solo del verbo HTTP.
+Esto no significa que una `API` no pueda diseñar un `POST` con comportamiento idempotente. Significa que `POST` no tiene esa garantía por defecto en `HTTP` y que, cuando necesitamos evitar duplicados, debemos añadir un mecanismo adecuado.
+
+De la misma forma, que `PUT` sea idempotente según la semántica `HTTP` no significa que cualquier implementación imaginable de `PUT` esté libre de efectos secundarios adicionales.
 
 La pregunta relevante siempre es:
 
@@ -162,19 +157,23 @@ POST /orders
 POST /reservations
 ```
 
-Normalmente esperamos que cada `POST` genere un recurso nuevo, y eso está bien para la mayoría de casos. El problema surge en operaciones donde repetir la llamada tiene un coste real, como un pago:
+Cada petición suele representar una nueva operación. Por eso un reintento accidental puede generar un segundo recurso o repetir un efecto secundario.
+
+Por ejemplo, si tenemos:
 
 ```http
 POST /payments
 ```
 
-Si el cliente reintenta tras un timeout, no queremos cobrarle dos veces. Necesitamos un mecanismo que permita distinguir *"esta es una petición nueva"* de *"esta es la misma intención del cliente, reenviada"*. Ahí entra `Idempotency-Key`.
+y el cliente recibe un timeout, no sabe si el servidor llegó a procesar el pago o no. Necesitamos un mecanismo que permita distinguir *"Quiero realizar un pago nuevo"* de *"Quiero volver a enviar el mismo pago porque no recibí la respuesta"*. Ahí entra `Idempotency-Key`.
 
 ---
 
 ## Idempotency-Key
 
-La solución habitual es que el **cliente** genere un identificador único por operación (normalmente un UUID) y lo envíe en una cabecera:
+La idea es sencilla: **el cliente genera un identificador único por operación** y lo envía en una cabecera HTTP.
+
+Normalmente puede utilizarse un `UUID`:
 
 ```http
 POST /orders
@@ -187,35 +186,38 @@ Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
 }
 ```
 
-La idea es simple:
+La clave representa una intención concreta del cliente.
 
-> Mientras esa `Idempotency-Key` represente una operación que ya hemos procesado, volver a recibirla no debe ejecutar la operación de nuevo.
+El flujo sería:
 
 ```text
-                   POST /orders
-                        │
-                        ▼
+                 POST /orders
+                      │
+                      ▼
               Idempotency-Key
-                        │
-                        ▼
-                ¿Existe la key?
-                  /          \
-                NO            SÍ
-                │             │
-                ▼             ▼
-           Procesar       No procesar
-                │             │
-                ▼             ▼
-        Guardar resultado   Devolver
-                            resultado
-                            anterior
+                      │
+                      ▼
+               ¿Existe la key?
+                 /         \
+               NO           SÍ
+               │             │
+               ▼             ▼
+          Reservar key    Comprobar estado
+               │             │
+               ▼             ├── COMPLETED → devolver resultado
+          Procesar           ├── PENDING   → indicar que sigue en curso
+               │             └── FAILED   → aplicar política definida
+               ▼
+       Guardar resultado
 ```
 
-La primera petición procesa la operación de verdad. Las siguientes devuelven el resultado ya calculado.
+La primera petición que consigue reservar la clave procesa la operación. Las peticiones posteriores reutilizan el resultado si la operación ya terminó.
+
+Si una petición llega mientras la primera sigue procesándose, debemos tener una política explícita para el estado `PENDING`.
 
 ---
 
-## Una primera implementación (y por qué no basta)
+## Una primera implementación y por qué no basta
 
 Un primer intento en el controlador podría ser:
 
@@ -266,7 +268,9 @@ process()                   process()
 save()                       save()
 ```
 
-Ambas peticiones comprueban `existsById` **antes** de que ninguna haya guardado nada. Las dos ven que la clave no existe, así que las dos continúan y las dos procesan la operación:
+Ambas peticiones comprueban `existsById` **antes** de que ninguna haya guardado nada. Las dos ven que la clave no existe y ambas continuan.
+
+El resultado puede ser:
 
 ```text
 Pedido #1001
@@ -275,7 +279,9 @@ Pedido #1002
 
 Hemos recreado exactamente el problema que queríamos evitar. Esto deja una lección clara:
 
-> **La idempotencia no se puede garantizar solo con un `if` en Java.** Necesitamos que la base de datos participe activamente en la garantía de unicidad, mediante una restricción PRIMARY KEY o UNIQUE y una operación atómica para reclamar la clave.
+> **La idempotencia no se puede garantizar solo con un `if` en Java.** 
+
+Necesitamos que la base de datos participe activamente en la garantía de unicidad, mediante una restricción `PRIMARY KEY` o `UNIQUE`.
 
 ---
 
@@ -326,6 +332,8 @@ public class IdempotencyKeyEntity {
 }
 ```
 
+Una tabla equivalente podría ser:
+
 ```sql
 CREATE TABLE idempotency_keys (
     idempotency_key VARCHAR(255) PRIMARY KEY,
@@ -338,22 +346,49 @@ CREATE TABLE idempotency_keys (
 );
 ```
 
-Aquí ya tenemos dos piezas clave que la versión antigua no tenía:
+Tenemos dos piezas especialmente importantes.
 
-* **`idempotency_key` como clave primaria**: la base de datos garantiza que, si dos peticiones intentan insertar la misma clave a la vez, solo una lo conseguirá. La otra recibirá una violación de restricción, que podemos capturar y tratar como "operación ya en curso o completada".
-* **`request_hash`**: nos permite detectar si la misma clave se está reutilizando con un cuerpo de petición distinto, algo que también debemos rechazar.
+* **`idempotency_key` como clave primaria**
+
+La base de datos garantiza que no pueden existir dos registros con la misma clave.
+
+Si dos peticiones intentan reservar la misma clave al mismo tiempo, **solo una podrá crear el registro**. La otra encontrará la restricción de unicidad y podremos tratar ese caso como una clave que ya existe.
+
+* **`request_hash`**
+
+También debemos detectar este caso:
+
+```
+Petición 1
+Idempotency-Key: abc
+productId: 123
+quantity: 2
+
+Petición 2
+Idempotency-Key: abc
+productId: 999
+quantity: 10
+```
+
+La misma clave no debería representar **dos operaciones diferentes**.
+
+Por eso almacenamos un **hash** de los datos relevantes de la petición.
+
+El hash debe calcularse a partir de una **representación determinista de esos datos**, por ejemplo un JSON canónico, utilizando SHA-256 u otro algoritmo criptográfico adecuado. No conviene utilizar simplemente `Object.hashCode()`.
 
 ---
 
-## Implementación robusta con Spring Boot
+## Implementación con Spring Boot
 
-Con la tabla ya definida, el servicio se apoya en la restricción única para resolver la condición de carrera, en lugar de fiarse de una comprobación previa:
+El repositorio puede ser muy sencillo:
 
 ```java
 public interface IdempotencyKeyRepository
         extends JpaRepository<IdempotencyKeyEntity, String> {
 }
 ```
+
+Y el servicio puede separar el ciclo de vida de la clave en varias operaciones:
 
 ```java
 @Service
@@ -362,77 +397,136 @@ public class OrderService {
     private final IdempotencyKeyRepository idempotencyRepository;
     private final OrderRepository orderRepository;
 
-    public OrderService(IdempotencyKeyRepository idempotencyRepository,
-                         OrderRepository orderRepository) {
+    public OrderService(
+            IdempotencyKeyRepository idempotencyRepository,
+            OrderRepository orderRepository
+    ) {
         this.idempotencyRepository = idempotencyRepository;
         this.orderRepository = orderRepository;
     }
 
-    public OrderResponse createOrder(String idempotencyKey, CreateOrderRequest request) {
-
+    public OrderResponse createOrder(
+            String idempotencyKey,
+            CreateOrderRequest request
+    ) {
         String requestHash = hash(request);
-        boolean reserved = tryReserveKey(idempotencyKey, requestHash);
+
+        boolean reserved = tryReserveKey(
+                idempotencyKey,
+                requestHash
+        );
 
         if (!reserved) {
-            return handleExistingKey(idempotencyKey, requestHash);
+            return handleExistingKey(
+                    idempotencyKey,
+                    requestHash
+            );
         }
 
         try {
-            OrderResponse response = processOrder(idempotencyKey, request);
-            completeKey(idempotencyKey, response);
+            OrderResponse response = processOrder(request);
+
+            completeKey(
+                    idempotencyKey,
+                    response
+            );
+
             return response;
+
         } catch (RuntimeException e) {
+
             failKey(idempotencyKey);
+
             throw e;
         }
     }
 
-    // 1. Reserva de la clave en su propia transacción, independiente
-    //    del resto del flujo, para no arrastrar un rollback-only.
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public boolean tryReserveKey(String idempotencyKey, String requestHash) {
+    public boolean tryReserveKey(
+            String idempotencyKey,
+            String requestHash
+    ) {
         try {
-            IdempotencyKeyEntity entity = new IdempotencyKeyEntity(
-                    idempotencyKey, requestHash, IdempotencyStatus.PENDING, Instant.now()
-            );
+            IdempotencyKeyEntity entity =
+                    new IdempotencyKeyEntity(
+                            idempotencyKey,
+                            requestHash,
+                            IdempotencyStatus.PENDING,
+                            Instant.now()
+                    );
+
             idempotencyRepository.saveAndFlush(entity);
+
             return true;
+
         } catch (DataIntegrityViolationException e) {
             return false;
         }
     }
 
-    // 2. La operación de negocio en su propia transacción.
     @Transactional
-    public OrderResponse processOrder(String idempotencyKey, CreateOrderRequest request) {
+    public OrderResponse processOrder(
+            CreateOrderRequest request
+    ) {
         return orderRepository.create(request);
     }
 
-    // 3. Cierre del ciclo de vida de la clave, también en transacción propia.
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void completeKey(String idempotencyKey, OrderResponse response) {
-        IdempotencyKeyEntity entity = idempotencyRepository.findById(idempotencyKey).orElseThrow();
-        entity.setStatus(IdempotencyStatus.COMPLETED);
-        entity.setResponse(toJson(response));
-        entity.setCompletedAt(Instant.now());
+    public void completeKey(
+            String idempotencyKey,
+            OrderResponse response
+    ) {
+        IdempotencyKeyEntity entity =
+                idempotencyRepository
+                        .findById(idempotencyKey)
+                        .orElseThrow();
+
+        entity.setStatus(
+                IdempotencyStatus.COMPLETED
+        );
+
+        entity.setResponse(
+                toJson(response)
+        );
+
+        entity.setHttpStatus(201);
+
+        entity.setCompletedAt(
+                Instant.now()
+        );
+
         idempotencyRepository.save(entity);
     }
 
-    // 4. En caso de excepción, añadimos el estado FAILED a la clave
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void failKey(String idempotencyKey) {
-        IdempotencyKeyEntity entity = idempotencyRepository.findById(idempotencyKey).orElseThrow();
-        entity.setStatus(IdempotencyStatus.FAILED);
-        entity.setCompletedAt(Instant.now());
+    public void failKey(
+            String idempotencyKey
+    ) {
+        IdempotencyKeyEntity entity =
+                idempotencyRepository
+                        .findById(idempotencyKey)
+                        .orElseThrow();
+
+        entity.setStatus(
+                IdempotencyStatus.FAILED
+        );
+
+        entity.setCompletedAt(
+                Instant.now()
+        );
+
         idempotencyRepository.save(entity);
     }
 
-    // 5. Manejar el flujo en caso de que la clave ya exista
     @Transactional(readOnly = true)
-    public OrderResponse handleExistingKey(String idempotencyKey, String requestHash) {
-
-        IdempotencyKeyEntity existing = idempotencyRepository.findById(idempotencyKey)
-                .orElseThrow();
+    public OrderResponse handleExistingKey(
+            String idempotencyKey,
+            String requestHash
+    ) {
+        IdempotencyKeyEntity existing =
+                idempotencyRepository
+                        .findById(idempotencyKey)
+                        .orElseThrow();
 
         if (!existing.getRequestHash().equals(requestHash)) {
             throw new IdempotencyConflictException(
@@ -441,19 +535,29 @@ public class OrderService {
         }
 
         return switch (existing.getStatus()) {
-            case COMPLETED -> fromJson(existing.getResponse());
-            case FAILED -> throw new OperationFailedException(idempotencyKey);
-            case PENDING -> throw new OperationInProgressException(idempotencyKey);
+
+            case COMPLETED ->
+                    fromJson(existing.getResponse());
+
+            case FAILED ->
+                    throw new OperationFailedException(
+                            idempotencyKey
+                    );
+
+            case PENDING ->
+                    throw new OperationInProgressException(
+                            idempotencyKey
+                    );
         };
     }
 }
 ```
 
-Puntos importantes de este diseño:
+Hay varios detalles importantes en este diseño.
 
-* El `saveAndFlush` inicial es lo que realmente resuelve la condición de carrera: si dos peticiones llegan a la vez, solo una consigue insertar la fila con esa clave primaria; la otra recibe `DataIntegrityViolationException` de forma determinista, garantizada por la base de datos.
-* La comparación de `requestHash` evita que alguien reutilice una clave con datos distintos por error (o de forma maliciosa).
-* Al mantener el registro de idempotencia y la operación de negocio dentro de la misma transacción, si ambas pertenecen a la misma base de datos, un fallo antes del `COMMIT` provoca el rollback de ambas operaciones. Esto evita dejar un registro `PENDING` persistente por accidente, pero también significa que un intento posterior podrá volver a intentar la operación
+* La reserva de la clave es independiente, `tryReserveKey()` utiliza `REQUIRES_NEW` para que la reserva de la clave se confirme independientemente de lo que ocurra después con la operación de negocio.
+* La reserva de la clave y `processOrder()` no están en la misma transacción. Queremos poder representar que una operación está `PENDING` incluso si la transacción posterior falla o si el pedido se guarda correctamente, después actualizamos la clave a **COMPLETED**.
+* La base de datos resuelve la carrera, el `saveAndFlush()` fuerza a que el **INSERT** se ejecute dentro de la transacción de reserva. La restricción **PRIMARY KEY** impide que dos peticiones puedan reservar simultáneamente la misma clave.
 
 ---
 
@@ -473,13 +577,36 @@ Representar explícitamente el estado ayuda a decidir qué hacer en cada caso:
      COMPLETED          FAILED
 ```
 
-Cuando una clave está en `PENDING` (otra petición la está procesando ahora mismo), tenemos varias opciones de diseño, no hay una única correcta:
+### COMPLETED
 
-* devolver `409 Conflict` o `425 Too Early`, dejando que el cliente reintente más tarde
-* bloquear brevemente y esperar a que termine
-* exponer un mecanismo de *polling* para consultar el estado
+La operación terminó correctamente. Una nueva petición con la misma key y el mismo hash debe recibir el resultado almacenado, sin ejecutar de nuevo la operación.
 
-La decisión depende de la latencia esperada de la operación y de las garantías que necesite el cliente.
+### PENDING
+
+Otra petición consiguió reservar la clave y todavía está procesando la operación.
+
+No existe una única respuesta correcta. Para un ejemplo sencillo, devolver `409 Conflict` es una opción razonable.
+
+Hay un escenario que no debemos ignorar: `PENDING` puede quedar huérfano.
+
+El cliente reintenta y encuentra `PENDING`, pero la operación real ya terminó.
+
+Por eso una implementación de producción necesita una **estrategia de recuperación**.
+
+Algunas opciones son:
+
+* Guardar `expires_at` y considerar caducadas las claves `PENDING` antiguas
+* Consultar el recurso de negocio antes de volver a ejecutar la operación
+
+Es importante entender que un estado `PENDING` no debe quedar sin mecanismo de recuperación en una implementación real.
+
+### FAILED
+
+En este ejemplo consideramos que la clave queda **consumida** aunque la operación falle.
+
+Eso significa que una nueva petición con la misma clave **no vuelve a ejecutar automáticamente la operación**. El cliente debe generar una nueva `Idempotency-Key` si quiere iniciar una nueva operación.
+
+Esta es una **decisión de diseño**, no una regla universal.
 
 ---
 
@@ -503,25 +630,61 @@ Idempotency-Key
      eliminar
 ```
 
-El tiempo adecuado depende del riesgo de la operación: para un pago puede tener sentido conservarla varios días; para una operación interna de bajo riesgo, unas pocas horas puede ser suficiente. Conviene definir explícitamente:
+El tiempo adecuado depende del tipo de la operación: para un pago puede tener sentido conservarla varios días. 
 
-* cuánto tiempo se conserva cada clave
-* qué ocurre si la misma clave llega después de haber expirado (¿se trata como nueva?)
-* cómo y cuándo se limpian las claves antiguas (job programado, TTL de la base de datos, etc.)
+Para una operación interna de bajo riesgo, unas pocas horas puede ser suficiente. 
+
+Conviene definir explícitamente:
+
+* Cuánto tiempo se conserva cada clave
+* Qué ocurre si la misma clave llega después de haber expirado
+* Cómo y cuándo se limpian las claves antiguas
+* Qué ocurre con las claves que siguen en `PENDING`
 
 ---
 
+## Qué ocurre con servicios externos
+
+Aquí aparece una de las limitaciones más importantes.
+
+Supongamos que `processOrder()` hace algo así:
+
+```text
+Base de datos
+     │
+     ▼
+Crear pedido
+     │
+     ▼
+Proveedor de pagos
+     │
+     ▼
+Cobrar tarjeta
+```
+
+Nuestra transacción de base de datos no puede hacer rollback de una llamada HTTP que ya se ejecutó en otro **sistema**.
+
+La base de datos puede volver atrás, pero el pago externo ya ocurrió.
+
+Por eso, cuando intervienen servicios externos, necesitamos **garantías adicionales**.
+
+La opción más sencilla es que el propio proveedor externo soporte idempotencia y podamos enviarle una clave única.
+
 ## ¿Todas las peticiones necesitan idempotencia?
 
-No. Añadir este mecanismo a todos los endpoints sería sobreingeniería.
+**No**. Añadir este mecanismo a todos los endpoints sería innecesario.
+
+Por ejemplo:
 
 ```http
 GET /orders/100
 ```
 
-no lo necesita: los métodos seguros (`GET`, `HEAD`) ya son idempotentes por definición y no tienen efectos secundarios.
+No necesita una `Idempotency-Key`.
 
-La idempotencia es relevante sobre todo para operaciones con efectos secundarios costosos de duplicar:
+`GET`, `HEAD` y `OPTIONS` son métodos seguros y, por definición, también son idempotentes. `PUT` y `DELETE` también son idempotentes según la semántica HTTP, aunque no sean métodos seguros.
+
+La idempotencia adicional suele ser especialmente interesante cuando una operación tiene efectos secundarios costosos de duplicar:
 
 ```text
 Crear un pedido
@@ -531,23 +694,38 @@ Enviar una transferencia
 Procesar una compra
 ```
 
-La pregunta que hay que hacerse en cada endpoint es siempre la misma:
+La pregunta que debemos hacernos en cada endpoint es:
 
 > **¿Qué ocurre si esta operación se ejecuta dos veces por un reintento?**
 
-Si la respuesta es "podría causar un problema real", hay que plantearse idempotencia.
+Si la respuesta es **"podría causar un problema real"**, debemos plantearnos cómo hacerla idempotente.
 
 ---
+
+## Respuestas HTTP
+
+Una **implementación real** debería definir claramente qué respuesta corresponde a cada estado.
+
+| Estado         | Situación                           | Respuesta posible                     |
+| -------------- | ----------------------------------- | ------------------------------------- |
+| `COMPLETED`    | La operación ya terminó             | Devolver la misma respuesta original  |
+| `PENDING`      | Otra petición la está procesando    | `409 Conflict`                        |
+| `FAILED`       | La operación falló                  | Devolver el error definido por la API |
+| Hash diferente | La key se reutilizó con otros datos | `409 Conflict`                        |
+
+No es obligatorio utilizar exactamente estos códigos en todos los sistemas. Lo importante es que el contrato sea explícito y consistente.
 
 ## Buenas prácticas
 
 * Usa una `Idempotency-Key` única por operación, generada por el cliente (normalmente un UUID).
-* No dependas únicamente de un `exists()` previo: apóyate en una restricción `UNIQUE` o clave primaria y captura la excepción de violación.
-* Guarda un hash de la petición junto a la clave para detectar reutilización con datos distintos.
-* Envuelve el registro de la clave y el procesamiento de la operación en la misma transacción.
+* No dependas únicamente de un `exists()` previo: apóyate en una restricción `UNIQUE` o clave primaria para resolver la concurrencia.
+* Guarda un hash de los datos relevantes de la petición para detectar reutilizaciones incorrectas de la misma key.
 * Representa explícitamente los estados (`PENDING`, `COMPLETED`, `FAILED`) y decide qué hacer con cada uno.
-* Define una política de expiración clara para las claves.
-* Reserva la idempotencia para operaciones con efectos secundarios reales; no la apliques a endpoints de solo lectura.
+* Define una política de expiración o recuperación para las claves.
+* Conserva la respuesta original si quieres que los reintentos reciban el mismo resultado.
+* Define cuánto tiempo se conservan las claves y cómo se limpian.
+* Si llamas a un proveedor externo, utiliza su mecanismo de idempotencia cuando exista.
+* No añadas idempotencia por defecto a endpoints donde no aporta ningún beneficio real.
 
 ---
 
@@ -563,7 +741,8 @@ La idempotencia no es solo una cabecera HTTP. Es una decisión de diseño que ha
 
 ## Bibliografía
 
-* [RFC 9110 — HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110)
-* [Spring Framework Documentation](https://docs.spring.io/spring-framework/reference/)
-* [Spring Data JPA Documentation](https://docs.spring.io/spring-data/jpa/reference/)
-* [Baeldung](https://www.baeldung.com/cs/idempotent-operations)
+- [RFC 9110 — HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110)
+- [Spring Framework — Transaction Management](https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html)
+- [Spring Data JPA — Reference Documentation](https://docs.spring.io/spring-data/jpa/reference/)
+- [Spring Data JPA — JpaRepository API](https://docs.spring.io/spring-data/jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html)
+- [Stripe — Idempotent requests](https://docs.stripe.com/api/idempotent_requests)
