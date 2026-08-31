@@ -40,6 +40,7 @@ const formattedDate = date.toLocaleDateString("es-ES", {
 >
   <article
     id="top"
+    class="scroll-mt-32 md:scroll-mt-24"
   >
     <!-- PORTADA -->
     {
@@ -98,15 +99,19 @@ const formattedDate = date.toLocaleDateString("es-ES", {
     prose-h2:mt-14
     prose-h2:mb-5
     prose-h2:text-2xl
+    prose-h2:scroll-mt-32
+    md:prose-h2:scroll-mt-24
     prose-h3:mt-10
     prose-h3:mb-4
     prose-h3:text-xl
+    prose-h3:scroll-mt-32
+    md:prose-h3:scroll-mt-24
     prose-p:leading-8
     prose-p:text-content
     prose-a:font-medium
     prose-a:text-accent
     prose-a:no-underline
-    hover:prose-a:underline
+    [&_a:hover]:underline
     prose-strong:font-semibold
     prose-strong:text-primary
     /* Código inline */
